@@ -73,17 +73,15 @@ public class Main {
 		for (Process o : list) {
 			pq.offer (o);
 		}
+		PriorityQueue<Process> ongoing = new PriorityQueue<Process> (1, new BurstTimeComparator());
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
+			// Pseudo-working version
+			/**
 			Process q = pq.peek();
 			if (q == null || q.arrival > p.burst) {
 				System.out.println (block + " " + p.id + " " + p.burst + "X");
 				// TODO Something is missing here.
-				try {
-					if (q.arrival < p.burst)
-						block = q.arrival;
-					continue;
-				} catch (Exception e) {}
 				block += p.burst;
 			} else {
 				int temp = p.burst - q.arrival;
@@ -98,27 +96,51 @@ public class Main {
 					pq.offer (p);
 					block = q.arrival;
 				}
+			}*/
+			// Experimental
+			while (p.arrival >= block) {
+				if (ongoing.isEmpty()) {
+					block = p.arrival;
+					break;
+				}
+				Process q = ongoing.poll();
+				if (p.arrival > q.burst + block) {
+					System.out.println (block + " " + q.id + " " + q.burst + "X");
+					block += q.burst;
+				} else {
+					int temp = block + q.burst - p.arrival;
+					System.out.println (block + " " + q.id + " " + temp);
+					q.burst = temp;
+					ongoing.offer (q);
+				}
 			}
+			// TODO Something goes here...
+			ongoing.offer (p);
 		}
 	}
 	
 	// Priority
 	public static void priority (ArrayList<Process> list) {
-		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new PriorityComparator());
+		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
 		int block = 0;
 		for (Process o : list) {
 			pq.offer (o);
 		}
+		PriorityQueue<Process> ongoing = new PriorityQueue<Process> (1, new PriorityComparator());
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
 			Process q = pq.peek();
-			System.out.println (block + " " + p.id + " " + p.burst + "X");
-			try {
-				if (q.arrival > p.burst)
+			if (q == null || q.arrival > p.burst) {
+				System.out.println (block + " " + p.id + " " + p.burst + "X");
+				block += p.burst;
+			} else {
+				if (q != null && q.prior < p.prior) {
+					System.out.println(block + " " + p.id + " " + q.arrival);
+					p.burst -= q.arrival;
+					ongoing.offer (p);
 					block = q.arrival;
-				continue;
-			} catch (Exception e) {}
-			block += p.burst;
+				} 
+			}
 		}
 	}
 	
@@ -132,7 +154,7 @@ public class Main {
 		ArrayList<Process> ongoing = new ArrayList<Process>();
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
-			while (p.arrival > block) {
+			while (p.arrival >= block) {
 				if (ongoing.isEmpty()) {
 					block = p.arrival;
 					break;
