@@ -8,6 +8,9 @@ int main() {
 
   processes[0] = new Process(20, 0, 1);
   processes[1] = new Process(10, 0, 5);
+  processes[2] = new Process(15, 0, 4);
+  processes[3] = new Process(3, 5, 0);
+  processes[4] = new Process(4, 7, 2);
 /*  int numAllProcesses = 5;
   int numProcessesLeft = numAllProcesses;
   int arrivalTime[numProcesses] = {20, 10, 15, 3, 4};
