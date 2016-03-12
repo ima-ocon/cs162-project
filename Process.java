@@ -1,6 +1,6 @@
 
 
-class Process {
+class Process{
   int arrivalTime, burstTime, priority, index;
 
   Process(int arrivalTime, int burstTime, int priority, int index) {
