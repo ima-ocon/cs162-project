@@ -124,6 +124,40 @@ public class Main {
 	
 	// Round Robin
 	public static void robin (ArrayList<Process> list, int rr) {
-		
+		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
+		int block = 0;
+		for (Process o : list) {
+			pq.offer (o);
+		}
+		ArrayList<Process> ongoing = new ArrayList<Process>();
+		while (!pq.isEmpty()) {
+			Process p = pq.poll();
+			while (p.arrival > block) {
+				if (ongoing.isEmpty()) {
+					block = p.arrival;
+					break;
+				}
+				Process q = ongoing.get (0);
+				if (q.burst <= rr) {
+					System.out.println (block + " " + q.id + " " + q.burst + "X");
+					block += q.burst;
+				} else {
+					System.out.println (block + " " + q.id + " " + rr);
+					q.burst -= rr;
+					ongoing.add (q);
+					block += rr;
+				}
+				ongoing.remove (0);
+			}
+			if (p.burst <= rr) {
+				System.out.println (block + " " + p.id + " " + p.burst + "X");
+				block += p.burst;
+			} else {
+				System.out.println (block + " " + p.id + " " + rr);
+				p.burst -= rr;
+				ongoing.add (p);
+				block += rr;
+			}
+		}
 	}
 }
