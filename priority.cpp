@@ -11,13 +11,25 @@ int main() {
   processes[2] = new Process(15, 0, 4);
   processes[3] = new Process(3, 5, 0);
   processes[4] = new Process(4, 7, 2);
-/*  int numAllProcesses = 5;
-  int numProcessesLeft = numAllProcesses;
-  int arrivalTime[numProcesses] = {20, 10, 15, 3, 4};
-  int burstTime[numProcesses] = {0, 0, 0, 5, 7};
-  int priority[numProcesses] = {1, 5, 4, 0, 2};
-  int currentTime = 0;
 
+  int numAllProcesses = 5;
+  int numProcessesLeft = numAllProcesses;
+
+  int currentTIme = 0;
+
+  int firstPriorityProcess = 0;
+  int firstPriorityNum = processes[0]->priority;
+
+  for (int x = 0; x < numAllProcesses; x++) {
+    if (firstPriorityNum > processes[x]->priority) {
+      firstPriorityProcess = x;
+      firstPriorityNum = processes[x]->priority;
+    }
+  }
+
+  cout << firstPriorityNum;
+
+/*
   //time so far, which process, CPU time
 
 
