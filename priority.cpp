@@ -1,33 +1,26 @@
 #include<iostream>
 #include<stdio.h>
+#include<algorithm>
+#include<vector>
 #include "Process.hpp"
 using namespace std;
 
+
+//2 arrays: sorted by priority
+//2 arrays: arrival time
+
+
 int main() {
-  Process* processes[5] = {};
+  vector<Process> currentProcesses;
+  vector<Process> unusedProcesses;
+  //array where algorithms sorted by priority
+  //another array where algorithms sorted by arrival time
 
-  processes[0] = new Process(20, 0, 1);
-  processes[1] = new Process(10, 0, 5);
-  processes[2] = new Process(15, 0, 4);
-  processes[3] = new Process(3, 5, 0);
-  processes[4] = new Process(4, 7, 2);
-
-  int numAllProcesses = 5;
-  int numProcessesLeft = numAllProcesses;
-
-  int currentTIme = 0;
-
-  int firstPriorityProcess = 0;
-  int firstPriorityNum = processes[0]->priority;
-
-  for (int x = 0; x < numAllProcesses; x++) {
-    if (firstPriorityNum > processes[x]->priority) {
-      firstPriorityProcess = x;
-      firstPriorityNum = processes[x]->priority;
-    }
-  }
-
-  cout << firstPriorityNum;
+/*  unusedProcesses[0] = new Process(20, 0, 1, 1);
+  unusedProcesses[1] = new Process(10, 0, 5, 2);
+  unusedProcesses[2] = new Process(15, 0, 4, 3);
+  unusedProcesses[3] = new Process(3, 5, 0, 4);
+  unusedProcesses[4] = new Process(4, 7, 2, 5);*/
 
 /*
   //time so far, which process, CPU time

@@ -4,15 +4,11 @@
 using namespace std;
 
 struct Process {
-  Process(int arrivalTime, int burstTime, int priority) {
-    this->arrivalTime = arrivalTime;
-    this->burstTime = burstTime;
-    this->priority = priority;
-    this->isDone = false;
-  }
-
   int arrivalTime;
   int burstTime;
   int priority;
+  int index;
   bool isDone;
+
+  Process(int a, int b, int p, int i) : arrivalTime(a), burstTime(b), priority(p), isDone(false), index(i) {}
 };
