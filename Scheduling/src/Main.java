@@ -17,18 +17,20 @@ public class Main {
 
 			System.out.println (i + "");
 
-/*			if (sched.equals("FCFS"))
+			//just testing this because my java version doesn't allow switch
+			//statements with strings lol
+			if (sched.equals("FCFS"))
 				fcfs(list);
 				else if (sched.equals("SJF"))
 					sjf(list);
 					else if (sched.equals("SRTF"))
-						srtf(list);
+						priorityOrSRTF(list, new RemainingTimeComparator());
 						else if (sched.equals("P"))
-							priority(list);
+							priorityOrSRTF(list, new PriorityComparator());
 							else if (sched.equals("RR"))
-								robin(list, rr);*/
+								robin(list, rr);
 
-			switch (sched) {
+/*			switch (sched) {
 				case "FCFS" : fcfs(list);
 				break;
 				case "SJF" : sjf(list);
@@ -39,7 +41,7 @@ public class Main {
 				break;
 				case "RR" : robin(list, rr);
 				break;
-			}
+			}*/
 		}
 	}
 
@@ -86,12 +88,11 @@ public class Main {
 
 	// Shortest Remaining Time First
 	public static void srtf (ArrayList<Process> list) {
-
 		Process currentProcess = null;
 
-    List<Process> currentProcesses = new ArrayList<Process>();
-
+		List<Process> currentProcesses = new ArrayList<Process>();
     List<Process> unusedProcesses = new ArrayList<Process>();
+
 		for (int x = 0; x < list.size(); x++) {
 			Process p = list.get(x);
 			p.index = x + 1;
@@ -232,6 +233,73 @@ public class Main {
 			System.out.println (block + " " + p.id + " " + p.burst + "X");
 			block += p.burst;
 		}*/
+	}
+
+	public static void priorityOrSRTF(ArrayList<Process>list, Comparator<Process> comparator) {
+		Process currentProcess = null;
+
+		List<Process> currentProcesses = new ArrayList<Process>();
+
+		List<Process> unusedProcesses = new ArrayList<Process>();
+		for (int x = 0; x < list.size(); x++) {
+			Process p = list.get(x);
+			p.index = x + 1;
+			unusedProcesses.add(p);
+		}
+
+		int processesLeft = unusedProcesses.size();
+
+		//unused processes -> sorted based on arrival time
+		Collections.sort(unusedProcesses, new ArrivalTimeComparator());
+
+		int currentTime = 0;
+		int timeProcessStarted = currentTime;
+		boolean added = false;
+
+		//while you still have processes left
+		while (processesLeft > 0){
+			added = false;
+
+			//if right now, there's a process that's arriving
+			while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
+				//add it to ongoing processes
+				currentProcesses.add(unusedProcesses.get(0));
+				//remove it from unused processes
+				unusedProcesses.remove(0);
+				added = true;
+			}
+
+			//if a new process just arrived
+			if (added) {
+				//resort current processes so new process ends up where it should
+				Collections.sort(currentProcesses, comparator);
+				//get the first priority process as current process
+				if ((currentProcess != null) && (currentProcess.index != currentProcesses.get(0).index)) {
+					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
+					timeProcessStarted = currentTime;
+				}
+
+				currentProcess = currentProcesses.get(0);
+			}
+
+			//burst time of current process - 1
+			currentProcess.run();
+			//if burst time is 0, process is done
+			if (currentProcess.remainingTime == 0) {
+				//remove process from ongoing queue
+				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
+				currentProcesses.remove(0);
+				//if there are still processes in ongoing queue, get the next one
+				if (currentProcesses.size() > 0) {
+					currentProcess = currentProcesses.get(0);
+					timeProcessStarted = currentTime+1;
+				}
+				processesLeft--;
+			}
+
+			//move on to next second
+			currentTime++;
+		}
 	}
 
 	// Priority
