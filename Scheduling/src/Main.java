@@ -14,9 +14,9 @@ public class Main {
 			for (int j = 1; j <= proc; j++) {
 				list.add (new Process (j, in.nextInt(), in.nextInt(), in.nextInt()));
 			}
-			
+
 			System.out.println (i + "");
-			switch (sched) {
+/*			switch (sched) {
 				case "FCFS" : fcfs(list);
 				break;
 				case "SJF" : sjf(list);
@@ -27,10 +27,12 @@ public class Main {
 				break;
 				case "RR" : robin(list, rr);
 				break;
-			}
+			}*/
+
+			srtf(list);
 		}
 	}
-	
+
 	// First Come, First Served
 	public static void fcfs (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
@@ -50,7 +52,7 @@ public class Main {
 			} catch (Exception e) {}
 		}
 	}
-	
+
 	// Shortest Job First
 	public static void sjf (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new BurstTimeComparator());
@@ -71,7 +73,7 @@ public class Main {
 			} catch (Exception e) {}
 		}
 	}
-	
+
 	// Shortest Remaining Time First
 	public static void srtf (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
@@ -123,7 +125,7 @@ public class Main {
 			block += p.burst;
 		}
 	}
-	
+
 	// Priority
 	public static void priority (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
@@ -169,7 +171,7 @@ public class Main {
 			block += p.burst;
 		}
 	}
-	
+
 	// Round Robin
 	public static void robin (ArrayList<Process> list, int rr) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
