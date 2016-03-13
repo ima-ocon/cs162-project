@@ -86,12 +86,118 @@ public class Main {
 		}
 	}
 
-	// Shortest Remaining Time First
-	public static void srtf (ArrayList<Process> list) {
+	public static void priorityOrSRTF(ArrayList<Process>list, Comparator<Process> comparator) {
 		Process currentProcess = null;
 
 		List<Process> currentProcesses = new ArrayList<Process>();
-    List<Process> unusedProcesses = new ArrayList<Process>();
+
+		List<Process> unusedProcesses = new ArrayList<Process>();
+		for (int x = 0; x < list.size(); x++) {
+			Process p = list.get(x);
+			p.index = x + 1;
+			unusedProcesses.add(p);
+		}
+
+		int processesLeft = unusedProcesses.size();
+
+		//unused processes -> sorted based on arrival time
+		Collections.sort(unusedProcesses, new ArrivalTimeComparator());
+
+		int currentTime = 0;
+		int timeProcessStarted = currentTime;
+		boolean added = false;
+
+		//while you still have processes left
+		while (processesLeft > 0){
+			added = false;
+
+			//if right now, there's a process that's arriving
+			while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
+				//add it to ongoing processes
+				currentProcesses.add(unusedProcesses.get(0));
+				//remove it from unused processes
+				unusedProcesses.remove(0);
+				added = true;
+			}
+
+			//if a new process just arrived
+			if (added) {
+				//resort current processes so new process ends up where it should
+				Collections.sort(currentProcesses, comparator);
+				//get the first priority process as current process
+				if ((currentProcess != null) && (currentProcess.index != currentProcesses.get(0).index)) {
+					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
+					timeProcessStarted = currentTime;
+				}
+
+				currentProcess = currentProcesses.get(0);
+			}
+
+			//burst time of current process - 1
+			currentProcess.run();
+			//if burst time is 0, process is done
+			if (currentProcess.remainingTime == 0) {
+				//remove process from ongoing queue
+				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
+				currentProcesses.remove(0);
+				//if there are still processes in ongoing queue, get the next one
+				if (currentProcesses.size() > 0) {
+					currentProcess = currentProcesses.get(0);
+					timeProcessStarted = currentTime+1;
+				}
+				processesLeft--;
+			}
+
+			//move on to next second
+			currentTime++;
+		}
+	}
+
+	// Round Robin
+	public static void robin (ArrayList<Process> list, int rr) {
+		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
+		int block = 0;
+		for (Process o : list) {
+			pq.offer (o);
+		}
+		ArrayList<Process> ongoing = new ArrayList<Process>();
+		while (!pq.isEmpty()) {
+			Process p = pq.poll();
+			while (p.arrival >= block) {
+				if (ongoing.isEmpty()) {
+					block = p.arrival;
+					break;
+				}
+				Process q = ongoing.get (0);
+				if (q.burst <= rr) {
+					System.out.println (block + " " + q.id + " " + q.burst + "X");
+					block += q.burst;
+				} else {
+					System.out.println (block + " " + q.id + " " + rr);
+					q.burst -= rr;
+					ongoing.add (q);
+					block += rr;
+				}
+				ongoing.remove (0);
+			}
+			if (p.burst <= rr) {
+				System.out.println (block + " " + p.id + " " + p.burst + "X");
+				block += p.burst;
+			} else {
+				System.out.println (block + " " + p.id + " " + rr);
+				p.burst -= rr;
+				ongoing.add (p);
+				block += rr;
+			}
+		}
+	}
+
+	// Shortest Remaining Time First
+/*	public static void srtf (ArrayList<Process> list) {
+		Process currentProcess = null;
+
+		List<Process> currentProcesses = new ArrayList<Process>();
+		List<Process> unusedProcesses = new ArrayList<Process>();
 
 		for (int x = 0; x < list.size(); x++) {
 			Process p = list.get(x);
@@ -101,57 +207,57 @@ public class Main {
 
 		int processesLeft = unusedProcesses.size();
 
-    //unused processes -> sorted based on arrival time
-    Collections.sort(unusedProcesses, new ArrivalTimeComparator());
+		//unused processes -> sorted based on arrival time
+		Collections.sort(unusedProcesses, new ArrivalTimeComparator());
 
-    int currentTime = 0;
+		int currentTime = 0;
 		int timeProcessStarted = currentTime;
-    boolean added = false;
+		boolean added = false;
 
-    //while you still have processes left
-    while (processesLeft > 0){
-      added = false;
+		//while you still have processes left
+		while (processesLeft > 0){
+			added = false;
 
-      //if right now, there's a process that's arriving
-      while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
-        //add it to ongoing processes
-        currentProcesses.add(unusedProcesses.get(0));
-        //remove it from unused processes
-        unusedProcesses.remove(0);
-        added = true;
-      }
+			//if right now, there's a process that's arriving
+			while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
+				//add it to ongoing processes
+				currentProcesses.add(unusedProcesses.get(0));
+				//remove it from unused processes
+				unusedProcesses.remove(0);
+				added = true;
+			}
 
-      //if a new process just arrived
-      if (added) {
-        //resort current processes so new process ends up where it should
-        Collections.sort(currentProcesses, new RemainingTimeComparator());
-        //get the first priority process as current process
+			//if a new process just arrived
+			if (added) {
+				//resort current processes so new process ends up where it should
+				Collections.sort(currentProcesses, new RemainingTimeComparator());
+				//get the first priority process as current process
 				if ((currentProcess != null) && (currentProcess.index != currentProcesses.get(0).index)) {
 					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
 					timeProcessStarted = currentTime;
 				}
 
-        currentProcess = currentProcesses.get(0);
-      }
+				currentProcess = currentProcesses.get(0);
+			}
 
-      //burst time of current process - 1
-      currentProcess.run();
-      //if burst time is 0, process is done
-      if (currentProcess.remainingTime == 0) {
-        //remove process from ongoing queue
+			//burst time of current process - 1
+			currentProcess.run();
+			//if burst time is 0, process is done
+			if (currentProcess.remainingTime == 0) {
+				//remove process from ongoing queue
 				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
-        currentProcesses.remove(0);
-        //if there are still processes in ongoing queue, get the next one
-        if (currentProcesses.size() > 0) {
-          currentProcess = currentProcesses.get(0);
+				currentProcesses.remove(0);
+				//if there are still processes in ongoing queue, get the next one
+				if (currentProcesses.size() > 0) {
+					currentProcess = currentProcesses.get(0);
 					timeProcessStarted = currentTime+1;
 				}
-        processesLeft--;
-      }
+				processesLeft--;
+			}
 
-      //move on to next second
-      currentTime++;
-    }
+			//move on to next second
+			currentTime++;
+		}
 
 /*		//priority queue based on arrival time
 		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
@@ -232,143 +338,11 @@ public class Main {
 			Process p = ongoing.poll();
 			System.out.println (block + " " + p.id + " " + p.burst + "X");
 			block += p.burst;
-		}*/
-	}
-
-	public static void priorityOrSRTF(ArrayList<Process>list, Comparator<Process> comparator) {
-		Process currentProcess = null;
-
-		List<Process> currentProcesses = new ArrayList<Process>();
-
-		List<Process> unusedProcesses = new ArrayList<Process>();
-		for (int x = 0; x < list.size(); x++) {
-			Process p = list.get(x);
-			p.index = x + 1;
-			unusedProcesses.add(p);
 		}
-
-		int processesLeft = unusedProcesses.size();
-
-		//unused processes -> sorted based on arrival time
-		Collections.sort(unusedProcesses, new ArrivalTimeComparator());
-
-		int currentTime = 0;
-		int timeProcessStarted = currentTime;
-		boolean added = false;
-
-		//while you still have processes left
-		while (processesLeft > 0){
-			added = false;
-
-			//if right now, there's a process that's arriving
-			while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
-				//add it to ongoing processes
-				currentProcesses.add(unusedProcesses.get(0));
-				//remove it from unused processes
-				unusedProcesses.remove(0);
-				added = true;
-			}
-
-			//if a new process just arrived
-			if (added) {
-				//resort current processes so new process ends up where it should
-				Collections.sort(currentProcesses, comparator);
-				//get the first priority process as current process
-				if ((currentProcess != null) && (currentProcess.index != currentProcesses.get(0).index)) {
-					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
-					timeProcessStarted = currentTime;
-				}
-
-				currentProcess = currentProcesses.get(0);
-			}
-
-			//burst time of current process - 1
-			currentProcess.run();
-			//if burst time is 0, process is done
-			if (currentProcess.remainingTime == 0) {
-				//remove process from ongoing queue
-				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
-				currentProcesses.remove(0);
-				//if there are still processes in ongoing queue, get the next one
-				if (currentProcesses.size() > 0) {
-					currentProcess = currentProcesses.get(0);
-					timeProcessStarted = currentTime+1;
-				}
-				processesLeft--;
-			}
-
-			//move on to next second
-			currentTime++;
-		}
-	}
+	}*/
 
 	// Priority
-	public static void priority (ArrayList<Process> list) {
-    Process currentProcess = null;
-
-    List<Process> currentProcesses = new ArrayList<Process>();
-
-    List<Process> unusedProcesses = new ArrayList<Process>();
-		for (int x = 0; x < list.size(); x++) {
-			Process p = list.get(x);
-			p.index = x + 1;
-			unusedProcesses.add(p);
-		}
-
-		int processesLeft = unusedProcesses.size();
-
-    //unused processes -> sorted based on arrival time
-    Collections.sort(unusedProcesses, new ArrivalTimeComparator());
-
-    int currentTime = 0;
-		int timeProcessStarted = currentTime;
-    boolean added = false;
-
-    //while you still have processes left
-    while (processesLeft > 0){
-      added = false;
-
-      //if right now, there's a process that's arriving
-      while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
-        //add it to ongoing processes
-        currentProcesses.add(unusedProcesses.get(0));
-        //remove it from unused processes
-        unusedProcesses.remove(0);
-        added = true;
-      }
-
-      //if a new process just arrived
-			if (added) {
-        //resort current processes so new process ends up where it should
-        Collections.sort(currentProcesses, new PriorityComparator());
-        //get the first priority process as current process
-				if ((currentProcess != null) && (currentProcess.index != currentProcesses.get(0).index)) {
-					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
-					timeProcessStarted = currentTime;
-				}
-
-        currentProcess = currentProcesses.get(0);
-      }
-
-      //burst time of current process - 1
-      currentProcess.run();
-      //if burst time is 0, process is done
-      if (currentProcess.remainingTime == 0) {
-        //remove process from ongoing queue
-				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
-        currentProcesses.remove(0);
-        //if there are still processes in ongoing queue, get the next one
-        if (currentProcesses.size() > 0) {
-          currentProcess = currentProcesses.get(0);
-					timeProcessStarted = currentTime+1;
-				}
-        processesLeft--;
-      }
-
-      //move on to next second
-      currentTime++;
-    }
-
+	/*public static void priority (ArrayList<Process> list) {
 		//the efficient version
 		/*
 		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
@@ -412,45 +386,6 @@ public class Main {
 			Process p = ongoing.poll();
 			System.out.println (block + " " + p.id + " " + p.burst + "X");
 			block += p.burst;
-		}*/
-	}
-
-	// Round Robin
-	public static void robin (ArrayList<Process> list, int rr) {
-		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
-		int block = 0;
-		for (Process o : list) {
-			pq.offer (o);
 		}
-		ArrayList<Process> ongoing = new ArrayList<Process>();
-		while (!pq.isEmpty()) {
-			Process p = pq.poll();
-			while (p.arrival >= block) {
-				if (ongoing.isEmpty()) {
-					block = p.arrival;
-					break;
-				}
-				Process q = ongoing.get (0);
-				if (q.burst <= rr) {
-					System.out.println (block + " " + q.id + " " + q.burst + "X");
-					block += q.burst;
-				} else {
-					System.out.println (block + " " + q.id + " " + rr);
-					q.burst -= rr;
-					ongoing.add (q);
-					block += rr;
-				}
-				ongoing.remove (0);
-			}
-			if (p.burst <= rr) {
-				System.out.println (block + " " + p.id + " " + p.burst + "X");
-				block += p.burst;
-			} else {
-				System.out.println (block + " " + p.id + " " + rr);
-				p.burst -= rr;
-				ongoing.add (p);
-				block += rr;
-			}
-		}
-	}
+	}*/
 }
