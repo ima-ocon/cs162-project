@@ -196,26 +196,21 @@ public class Main {
       //if a new process just arrived
       if (added) {
 				if (currentProcess != null)
-					System.out.println(timeProcessStarted + " " + currentProcess.index);
+					System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted));
 
         //resort current processes so new process ends up where it should
         Collections.sort(currentProcesses, new PriorityComparator());
         //get the first priority process as current process
         currentProcess = currentProcesses.get(0);
 				timeProcessStarted = currentTime;
-
-//				System.out.println(currentTime + " " + currentProcess.index);
       }
-
-//      System.out.println("Current time: " + currentTime);
-//      currentProcess.print();
 
       //burst time of current process - 1
       currentProcess.run();
       //if burst time is 0, process is done
       if (currentProcess.remainingTime == 0) {
         //remove process from ongoing queue
-				System.out.println(timeProcessStarted + " " + currentProcess.index + "X");
+				System.out.println(timeProcessStarted + " " + currentProcess.index + " " + (currentTime - timeProcessStarted + 1) + "X");
         currentProcesses.remove(0);
         //if there are still processes in ongoing queue, get the next one
         if (currentProcesses.size() > 0) {
