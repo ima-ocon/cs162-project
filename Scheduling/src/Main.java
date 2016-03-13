@@ -135,6 +135,7 @@ public class Main {
 
 			if (currentProcess == null) {
 				currentTime++;
+				timeProcessStarted = currentTime;
 				continue;
 			}
 
