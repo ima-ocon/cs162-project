@@ -16,6 +16,18 @@ public class Main {
 			}
 
 			System.out.println (i + "");
+
+/*			if (sched.equals("FCFS"))
+				fcfs(list);
+				else if (sched.equals("SJF"))
+					sjf(list);
+					else if (sched.equals("SRTF"))
+						srtf(list);
+						else if (sched.equals("P"))
+							priority(list);
+							else if (sched.equals("RR"))
+								robin(list, rr);*/
+
 			switch (sched) {
 				case "FCFS" : fcfs(list);
 				break;
