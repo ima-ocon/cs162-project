@@ -2,7 +2,7 @@ import java.util.*;
 
 class SRTF {
   public static void main(String args[]) {
-    int processesLeft = 5;
+    int processesLeft = 4;
     Process currentProcess = null;
 
     List<Process> currentProcesses = new ArrayList<Process>();
@@ -11,6 +11,9 @@ class SRTF {
     unusedProcesses.add(new Process(0, 50, 2, 1));
     unusedProcesses.add(new Process(40, 2, 3, 2));
     unusedProcesses.add(new Process(20, 3, 1, 3));
+    unusedProcesses.add(new Process(30, 55, 1, 3));
+
+    System.out.println("Hello");
 
     Collections.sort(unusedProcesses, new ArrivalTimeComparator());
 
@@ -32,7 +35,7 @@ class SRTF {
       }
 
       if (added) {
-        Collections.sort(currentProcesses, new PriorityComparator());
+        Collections.sort(currentProcesses, new RemainingTimeComparator());
         currentProcess = currentProcesses.get(0);
       }
 
