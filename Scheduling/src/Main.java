@@ -121,6 +121,7 @@ public class Main {
 				}
 			}
 			// TODO Something goes here...
+			Process q = pq.peek();
 			ongoing.offer (p);
 		}
 	}
@@ -136,32 +137,40 @@ public class Main {
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
 			Process q = pq.peek();
-			if (q == null || q.arrival > block + p.burst) {
+			if (q == null || q.arrival > p.burst + block) {
 				System.out.println (block + " " + p.id + " " + p.burst + "X");
 				block += p.burst;
-				if (q.arrival > block + p.burst) {
-					
+				while (q != null && q.arrival > p.burst + block && !ongoing.isEmpty()) {
+					Process o = ongoing.poll();
+					if (o.prior < q.prior) {
+						ongoing.offer (o);
+					} else {
+						int temp = q.arrival - block;
+						System.out.println (block + " " + p.id + " " + temp);
+						block += temp;
+						p.burst -= temp;
+						ongoing.offer (q);
+					}
 				}
 			} else {
-				/**
-				if (q.prior < p.prior) {
-					int temp = block + p.burst - q.arrival;
-					System.out.println(block + " " + p.id + " " + temp);
-					p.burst -= temp;
-					ongoing.offer (p);
-					block = q.arrival;
-				} */
-				if (p.prior <= q.prior) {
-					ongoing.offer (q);
-					pq.poll();
+				if (q == null || p.prior < q.prior) {
+					if (q != null) {
+						ongoing.offer (pq.poll());
+						pq.offer (p);
+					}
 				} else {
-					int temp = block + p.burst - q.arrival;
-					System.out.println(block + " " + p.id + " " + temp);
+					int temp = q.arrival - block;
+					System.out.println (block + " " + p.id + " " + temp);
+					block += temp;
 					p.burst -= temp;
 					ongoing.offer (p);
-					block = q.arrival;
 				}
 			}
+		}
+		while (!ongoing.isEmpty()) {
+			Process p = ongoing.poll();
+			System.out.println (block + " " + p.id + " " + p.burst + "X");
+			block += p.burst;
 		}
 	}
 	
