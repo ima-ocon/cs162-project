@@ -75,54 +75,52 @@ public class Main {
 	// Shortest Remaining Time First
 	public static void srtf (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process> (list.size(), new ArrivalTimeComparator());
-		int block = 0;
 		for (Process o : list) {
 			pq.offer (o);
 		}
+		int block = pq.peek().arrival;
 		PriorityQueue<Process> ongoing = new PriorityQueue<Process> (1, new BurstTimeComparator());
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
-			// Pseudo-working version
-			/**
 			Process q = pq.peek();
-			if (q == null || q.arrival > p.burst) {
+			if (q == null || q.arrival > p.burst + block) {
 				System.out.println (block + " " + p.id + " " + p.burst + "X");
-				// TODO Something is missing here.
 				block += p.burst;
+				while (q != null && q.arrival > block && !ongoing.isEmpty()) {
+					Process o = ongoing.poll();
+					if (q.arrival < o.burst + block) {
+						if (q.burst <= o.burst) {
+							int temp = q.arrival - block;
+							System.out.println (block + " " + o.id + " " + temp);
+							o.burst -= temp;
+							block += temp;
+							ongoing.offer (o);
+						} else {
+							// TODO Fix bug here.
+							ongoing.offer (pq.poll());
+						}
+					} else {
+						System.out.println (block + " " + o.id + " " + o.burst + "X");
+						block += o.burst;
+					}
+				}
 			} else {
-				int temp = p.burst - q.arrival;
-				p.arrival = q.arrival;
-				if (temp <= q.burst) {
-					System.out.println (block + " " + p.id + " " + p.burst + "X");
-					block += p.burst;
-				} else {
-					System.out.println (block + " " + p.id + " " + q.arrival);
-					p.burst = temp;
-					p.arrival = q.arrival;
+				if (p.burst < q.burst) {
+					ongoing.offer (pq.poll());
 					pq.offer (p);
-					block = q.arrival;
-				}
-			}*/
-			// Experimental
-			while (p.arrival >= block) {
-				if (ongoing.isEmpty()) {
-					block = p.arrival;
-					break;
-				}
-				Process q = ongoing.poll();
-				if (p.arrival > q.burst + block) {
-					System.out.println (block + " " + q.id + " " + q.burst + "X");
-					block += q.burst;
 				} else {
-					int temp = block + q.burst - p.arrival;
-					System.out.println (block + " " + q.id + " " + temp);
-					q.burst = temp;
-					ongoing.offer (q);
+					int temp = q.arrival - block;
+					System.out.println (block + " " + p.id + " " + temp);
+					block += temp;
+					p.burst -= temp;
+					ongoing.offer (p);
 				}
 			}
-			// TODO Something goes here...
-			Process q = pq.peek();
-			ongoing.offer (p);
+		}
+		while (!ongoing.isEmpty()) {
+			Process p = ongoing.poll();
+			System.out.println (block + " " + p.id + " " + p.burst + "X");
+			block += p.burst;
 		}
 	}
 	
@@ -142,7 +140,7 @@ public class Main {
 				block += p.burst;
 				while (q != null && q.arrival > p.burst + block && !ongoing.isEmpty()) {
 					Process o = ongoing.poll();
-					if (o.prior < q.prior) {
+					if (q.prior < o.prior) {
 						ongoing.offer (o);
 					} else {
 						int temp = q.arrival - block;
@@ -153,11 +151,9 @@ public class Main {
 					}
 				}
 			} else {
-				if (q == null || p.prior < q.prior) {
-					if (q != null) {
-						ongoing.offer (pq.poll());
-						pq.offer (p);
-					}
+				if (p.prior < q.prior) {
+					ongoing.offer (pq.poll());
+					pq.offer (p);
 				} else {
 					int temp = q.arrival - block;
 					System.out.println (block + " " + p.id + " " + temp);
