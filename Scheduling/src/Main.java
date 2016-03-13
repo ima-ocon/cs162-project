@@ -34,20 +34,20 @@ public class Main {
 	// First Come, First Served
 	public static void fcfs (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
-		int block = 0;
 		for (Process o : list) {
 			pq.offer (o);
 		}
+		int block = pq.peek().arrival;
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
 			Process q = pq.peek();
 			System.out.println (block + " " + p.id + " " + p.burst + "X");
+			block += p.burst;
 			try {
-				if (q.arrival > p.burst)
+				if (q.arrival > block + p.burst)
 					block = q.arrival;
 				continue;
 			} catch (Exception e) {}
-			block += p.burst;
 		}
 	}
 	
@@ -57,12 +57,18 @@ public class Main {
 		for (Process o : list) {
 			pq.offer (o);
 		}
-		int block = pq.peek().arrival;;
+		int block = pq.peek().arrival;
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
+			Process q = pq.peek();
 			// TODO Clarify details
 			System.out.println (block + " " + p.id + " " + p.burst + "X");
 			block += p.burst;
+			try {
+				if (q.arrival > block + p.burst)
+					block = q.arrival;
+				continue;
+			} catch (Exception e) {}
 		}
 	}
 	
@@ -122,24 +128,39 @@ public class Main {
 	// Priority
 	public static void priority (ArrayList<Process> list) {
 		PriorityQueue<Process> pq = new PriorityQueue<Process>  (list.size(), new ArrivalTimeComparator());
-		int block = 0;
 		for (Process o : list) {
 			pq.offer (o);
 		}
+		int block = pq.peek().arrival;
 		PriorityQueue<Process> ongoing = new PriorityQueue<Process> (1, new PriorityComparator());
 		while (!pq.isEmpty()) {
 			Process p = pq.poll();
 			Process q = pq.peek();
-			if (q == null || q.arrival > p.burst) {
+			if (q == null || q.arrival > block + p.burst) {
 				System.out.println (block + " " + p.id + " " + p.burst + "X");
 				block += p.burst;
+				if (q.arrival > block + p.burst) {
+					
+				}
 			} else {
-				if (q != null && q.prior < p.prior) {
-					System.out.println(block + " " + p.id + " " + q.arrival);
-					p.burst -= q.arrival;
+				/**
+				if (q.prior < p.prior) {
+					int temp = block + p.burst - q.arrival;
+					System.out.println(block + " " + p.id + " " + temp);
+					p.burst -= temp;
 					ongoing.offer (p);
 					block = q.arrival;
-				} 
+				} */
+				if (p.prior <= q.prior) {
+					ongoing.offer (q);
+					pq.poll();
+				} else {
+					int temp = block + p.burst - q.arrival;
+					System.out.println(block + " " + p.id + " " + temp);
+					p.burst -= temp;
+					ongoing.offer (p);
+					block = q.arrival;
+				}
 			}
 		}
 	}
