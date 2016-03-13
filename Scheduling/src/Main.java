@@ -133,6 +133,11 @@ public class Main {
 				currentProcess = currentProcesses.get(0);
 			}
 
+			if (currentProcess == null) {
+				currentTime++;
+				continue;
+			}
+
 			//burst time of current process - 1
 			currentProcess.run();
 			//if burst time is 0, process is done
