@@ -14,46 +14,50 @@ class Test {
     unusedProcesses.add(new Process(5, 3, 0, 4));
     unusedProcesses.add(new Process(7, 4, 2, 5));
 
+    //unused processes -> sorted based on arrival time
     Collections.sort(unusedProcesses, new ArrivalTimeComparator());
 
     int currentTime = 0;
     boolean added = false;
 
+    //while you still have processes left
     while (processesLeft > 0){
       added = false;
 
-/*      for (int x = 0; x < unusedProcesses.size(); x++) {
-        System.out.println("Unused:");
-              unusedProcesses.get(x).print();
-      }*/
-
+      //if right now, there's a process that's arriving
       while ((unusedProcesses.size()) > 0 && (unusedProcesses.get(0).getArrivalTime() == currentTime)) {
+        //add it to ongoing processes
         currentProcesses.add(unusedProcesses.get(0));
+        //remove it from unused processes
         unusedProcesses.remove(0);
         added = true;
       }
 
+      //if a new process just arrived
       if (added) {
+        //resort current processes so new process ends up where it should
         Collections.sort(currentProcesses, new PriorityComparator());
+        //get the first priority process as current process
         currentProcess = currentProcesses.get(0);
       }
 
-      System.out.println("Current time: " + currentTime);
-      currentProcess.print();
+      /*System.out.println("Current time: " + currentTime);
+      currentProcess.print();*/
 
+      //burst time of current process - 1
       currentProcess.run();
+      //if burst time is 0, process is done
       if (currentProcess.remainingTime == 0) {
         System.out.println("Done!");
+        //remove process from ongoing queue
         currentProcesses.remove(0);
+        //if there are still processes in ongoing queue, get the next one
         if (currentProcesses.size() > 0)
           currentProcess = currentProcesses.get(0);
         processesLeft--;
       }
 
-/*      for (int x = 0; x < currentProcesses.size(); x++) {
-        System.out.println(currentProcesses.get(x).getArrivalTime());
-      }*/
-
+      //move on to next second
       currentTime++;
     }
   }
