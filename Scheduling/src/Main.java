@@ -98,8 +98,10 @@ public class Main {
 							block += temp;
 							ongoing.offer (o);
 						} else {
-							// TODO Fix bug here.
 							ongoing.offer (pq.poll());
+							pq.offer (o);
+							q = pq.peek();
+							
 						}
 					} else {
 						System.out.println (block + " " + o.id + " " + o.burst + "X");
